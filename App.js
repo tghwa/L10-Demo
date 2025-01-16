@@ -1,20 +1,55 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React,{useState, useEffect} from 'react';
+import { FlatList, StatusBar, Text, TextInput, View} from 'react-native';
+let originalData = [];
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const App = () => {
+
+
+    const [myData, setMyData] = useState([]);
+
+    // Add fetch
+    useEffect(() => {
+        fetch("https://jsonplaceholder.typicode.com/albums")
+            .then((response) => {
+                return response.json();
+            })
+            .then((myJson)=>{
+                if(originalData.length<1) {
+                    setMyData(myJson);
+                    originalData = myJson;
+                }
+            })
+    });
+
+    // Create FilterData function
+    const FilterData = (text) => {
+        if(text!=='') {
+            let myFilteredData = originalData.filter((item) =>
+                item.title.includes(text));
+                setMyData(myFilteredData);
+        }
+        else {
+            setMyData(originalData);
+        }
+    }
+
+
+    const renderItem = ({item, index}) => {
+        return (
+            <View>
+                <Text style={{borderWidth:1}}>{item.title}</Text>
+            </View>
+        );
+    };
+
+    return (
+        <View>
+            <StatusBar/>
+            <Text>Search:</Text>
+            <TextInput style={{borderWidth:1}} onChangeText={(text)=>{FilterData(text)}}/>
+            <FlatList data={myData} renderItem={renderItem} />
+        </View>
+    );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
